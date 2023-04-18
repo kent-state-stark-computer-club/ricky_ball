@@ -5,13 +5,14 @@ let isGameWon = false;
 let port;
 let data_x, data_y;
 let accumulatedData = "";
-
+let sword;
 
 
 function setup() {
   createCanvas(1000, 600);
   blueCircle = new Circle(20, 20, 20, "blue");
   greenCircle = new Circle(width - 20, height - 20, 20, "green");
+  sword = new Sword(blueCircle.x, blueCircle.y, 30, 0);
 
 
 
@@ -101,6 +102,16 @@ async function openSerialPort() {
 
 function draw() {
   background(255);
+
+  sword.updatePosition(blueCircle.x, blueCircle.y);
+sword.show();
+
+if (keyIsDown(90)) { // Add this block
+  sword.rotateAround(radians(6)); // 6 is an arbitrary value, adjust it to control the rotation speed
+}
+if (keyIsDown(88)) { // Add this block
+  sword.rotateAround(radians(-6)); // 6 is an arbitrary value, adjust it to control the rotation speed
+}
   
   if (!isGameOver && !isGameWon) {
   // blueCircle.moveWithJoystick();
@@ -262,6 +273,39 @@ class Circle {
   collidesWith(otherCircle) {
     let distanceBetween = dist(this.x, this.y, otherCircle.x, otherCircle.y);
     return distanceBetween < (this.diameter + otherCircle.diameter) / 2;
+  }
+}
+
+
+
+
+
+
+class Sword {
+  constructor(x, y, length, angle) {
+    this.x = x;
+    this.y = y;
+    this.length = length;
+    this.angle = angle;
+  }
+
+  show() {
+    strokeWeight(2);
+    stroke(0);
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle);
+    line(0, 0, this.length, 0);
+    pop();
+  }
+
+  updatePosition(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  rotateAround(angle) {
+    this.angle += angle;
   }
 }
 

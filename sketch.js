@@ -145,6 +145,13 @@ if (keyIsDown(88)) { // Add this block
     fill("green");
     text("You Win! Press Start to play again", width / 2, height / 2);
   }
+
+  for (let i = blackCircles.length - 1; i >= 0; i--) {
+    const blackCircle = blackCircles[i];
+    if (swordIntersectsCircle(sword, blackCircle)) {
+      blackCircles.splice(i, 1);
+    }
+  }
 }
 
 
@@ -309,3 +316,13 @@ class Sword {
   }
 }
 
+
+function swordIntersectsCircle(sword, circle) {
+  const x2 = sword.x + sword.length * cos(sword.angle);
+  const y2 = sword.y + sword.length * sin(sword.angle);
+
+  const d = dist(sword.x, sword.y, circle.x, circle.y);
+  const d2 = dist(x2, y2, circle.x, circle.y);
+
+  return (d < circle.diameter / 2) || (d2 < circle.diameter / 2);
+}

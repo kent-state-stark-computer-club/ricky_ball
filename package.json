@@ -1,0 +1,16 @@
+{
+  "name": "rickyballs",
+  "version": "1.0.0",
+  "description": "a ball rolling good time",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "erik zavarelli",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "p5": "^1.6.0",
+    "p5.serialport": "^0.0.31"
+  }
+}

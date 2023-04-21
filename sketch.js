@@ -114,10 +114,10 @@ function draw() {
   //blueCircle.show();
   greenCircle.show();
 
-if (keyIsDown(90)) { 
+if (keyIsDown(88)) { 
   sword.rotateAround(radians(10)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
-if (keyIsDown(88)) { 
+if (keyIsDown(90)) { 
   sword.rotateAround(radians(-10)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
   

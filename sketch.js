@@ -6,7 +6,11 @@ let port;
 let data_x, data_y;
 let accumulatedData = "";
 let sword;
+let playerImage;
 
+function preload() {
+  playerImage = loadImage("player.png");
+}
 
 function setup() {
   createCanvas(1000, 600);
@@ -102,6 +106,8 @@ async function openSerialPort() {
 
 function draw() {
   background(255);
+ // Draw the player
+ image(playerImage, blueCircle.x, blueCircle.y);
 
   sword.updatePosition(blueCircle.x, blueCircle.y);
 sword.show();
@@ -118,7 +124,7 @@ if (keyIsDown(88)) { // Add this block
     blueCircle.moveWithArrowKeys();
   }
 
-  blueCircle.show();
+  
   greenCircle.show();
 
   for (let i = 0; i < blackCircles.length; i++) {

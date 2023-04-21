@@ -13,10 +13,10 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1000, 600);
+  createCanvas(900, 500);
   blueCircle = new Circle(20, 20, 20, "blue");
   greenCircle = new Circle(width - 20, height - 20, 20, "green");
-  sword = new Sword(blueCircle.x, blueCircle.y, 30, 0);
+  sword = new Sword(blueCircle.x, blueCircle.y, 30, -1);
 
 
 
@@ -107,16 +107,18 @@ async function openSerialPort() {
 function draw() {
   background(255);
  // Draw the player
- image(playerImage, blueCircle.x-10, blueCircle.y-10);
+ image(playerImage, blueCircle.x-20, blueCircle.y-15);
 
-  sword.updatePosition(blueCircle.x+22, blueCircle.y+10);
-sword.show();
+  sword.updatePosition(blueCircle.x+12, blueCircle.y+5);
+  sword.show();
+  //blueCircle.show();
+  greenCircle.show();
 
-if (keyIsDown(90)) { // Add this block
-  sword.rotateAround(radians(6)); // 6 is an arbitrary value, adjust it to control the rotation speed
+if (keyIsDown(90)) { 
+  sword.rotateAround(radians(10)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
-if (keyIsDown(88)) { // Add this block
-  sword.rotateAround(radians(-6)); // 6 is an arbitrary value, adjust it to control the rotation speed
+if (keyIsDown(88)) { 
+  sword.rotateAround(radians(-10)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
   
   if (!isGameOver && !isGameWon) {
@@ -124,8 +126,7 @@ if (keyIsDown(88)) { // Add this block
     blueCircle.moveWithArrowKeys();
   }
 
-  
-  greenCircle.show();
+ 
 
   for (let i = 0; i < blackCircles.length; i++) {
     blackCircles[i].show();
@@ -142,14 +143,14 @@ if (keyIsDown(88)) { // Add this block
     textSize(32);
     textAlign(CENTER, CENTER);
     fill("red");
-    text("Game Over! Press Start to try again", width / 2, height / 2);
+    text("Game Over! Press Space to try again", width / 2, height / 2);
   }
 
   if (isGameWon) {
     textSize(32);
     textAlign(CENTER, CENTER);
     fill("green");
-    text("You Win! Press Start to play again", width / 2, height / 2);
+    text("You Win! Press Space to play again", width / 2, height / 2);
   }
 
   for (let i = blackCircles.length - 1; i >= 0; i--) {
@@ -176,8 +177,8 @@ class Circle {
   constructor(x, y, diameter, color) {
     this.x = x;
     this.y = y;
-     this.vx = 0; // Add this line
-    this.vy = 0; // Add this line
+     this.vx = 0; 
+    this.vy = 0; 
     this.diameter = diameter;
     this.color = color;
   }
@@ -338,4 +339,13 @@ function swordIntersectsCircle(sword, circle) {
 
   const distance = dist(closestX, closestY, circle.x, circle.y);
   return distance < circle.diameter / 2;
+}
+
+function keyPressed() {
+  if (keyCode === 32) { // 32 is the keyCode for the spacebar
+    isGameOver = false;
+    isGameWon = false;
+    blueCircle.x = 20;
+    blueCircle.y = 20;
+  }
 }

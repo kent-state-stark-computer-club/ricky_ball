@@ -34,9 +34,9 @@ function setup() {
     blueCircle.y = 20;
   });
 
-  //openSerialPort();
-  let connectButton = createButton("Connect");
-connectButton.mousePressed(openSerialPort);
+  
+  //let connectButton = createButton("Connect");
+//connectButton.mousePressed(openSerialPort);
 
 }
 
@@ -44,9 +44,9 @@ connectButton.mousePressed(openSerialPort);
 
 
 
+//async function for joystick
 
-
-
+/*
 
 async function openSerialPort() {
   if (port) {
@@ -95,7 +95,7 @@ async function openSerialPort() {
   }
 }
 
-
+*/
 
 
 
@@ -107,9 +107,9 @@ async function openSerialPort() {
 function draw() {
   background(255);
  // Draw the player
- image(playerImage, blueCircle.x, blueCircle.y);
+ image(playerImage, blueCircle.x-10, blueCircle.y-10);
 
-  sword.updatePosition(blueCircle.x, blueCircle.y);
+  sword.updatePosition(blueCircle.x+22, blueCircle.y+10);
 sword.show();
 
 if (keyIsDown(90)) { // Add this block
@@ -323,12 +323,19 @@ class Sword {
 }
 
 
+
 function swordIntersectsCircle(sword, circle) {
   const x2 = sword.x + sword.length * cos(sword.angle);
   const y2 = sword.y + sword.length * sin(sword.angle);
 
-  const d = dist(sword.x, sword.y, circle.x, circle.y);
-  const d2 = dist(x2, y2, circle.x, circle.y);
+  const dx = x2 - sword.x;
+  const dy = y2 - sword.y;
+  const t = ((circle.x - sword.x) * dx + (circle.y - sword.y) * dy) / (dx * dx + dy * dy);
 
-  return (d < circle.diameter / 2) || (d2 < circle.diameter / 2);
+  const closestT = constrain(t, 0, 1);
+  const closestX = sword.x + closestT * dx;
+  const closestY = sword.y + closestT * dy;
+
+  const distance = dist(closestX, closestY, circle.x, circle.y);
+  return distance < circle.diameter / 2;
 }

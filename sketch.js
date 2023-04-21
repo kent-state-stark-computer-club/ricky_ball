@@ -7,6 +7,7 @@ let data_x, data_y;
 let accumulatedData = "";
 let sword;
 let playerImage;
+let greenProjectiles = [];
 
 function preload() {
   playerImage = loadImage("player.png");
@@ -16,7 +17,7 @@ function setup() {
   createCanvas(900, 500);
   blueCircle = new Circle(20, 20, 20, "blue");
   greenCircle = new Circle(width - 20, height - 20, 20, "green");
-  sword = new Sword(blueCircle.x, blueCircle.y, 30, -1);
+  sword = new Sword(blueCircle.x, blueCircle.y, 100, -1);
 
 
 
@@ -111,14 +112,18 @@ function draw() {
 
   sword.updatePosition(blueCircle.x+12, blueCircle.y+5);
   sword.show();
-  //blueCircle.show();
+  blueCircle.show();
   greenCircle.show();
 
+  for (let i = 0; i < greenProjectiles.length; i++) {
+    greenProjectiles[i].show();
+    greenProjectiles[i].move();
+  }
 if (keyIsDown(88)) { 
-  sword.rotateAround(radians(10)); // 6 is an arbitrary value, adjust it to control the rotation speed
+  sword.rotateAround(radians(20)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
 if (keyIsDown(90)) { 
-  sword.rotateAround(radians(-10)); // 6 is an arbitrary value, adjust it to control the rotation speed
+  sword.rotateAround(radians(-20)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
   
   if (!isGameOver && !isGameWon) {
@@ -166,7 +171,27 @@ if (keyIsDown(90)) {
 
 
 
+class Projectile {
+  constructor(x, y, diameter, color, dx, dy) {
+    this.x = x;
+    this.y = y;
+    this.diameter = diameter;
+    this.color = color;
+    this.dx = dx;
+    this.dy = dy;
+  }
 
+  show() {
+    fill(this.color);
+    noStroke();
+    ellipse(this.x, this.y, this.diameter);
+  }
+
+  move() {
+    this.x += this.dx;
+    this.y += this.dy;
+  }
+}
 
 
 
@@ -189,7 +214,19 @@ class Circle {
     ellipse(this.x, this.y, this.diameter);
   }
 
+  shootProjectile() {
+    const projectileSize = 10;
+    const projectileSpeed = 5;
 
+    // Calculate the direction of the projectile based on the sword's angle
+    const dx = cos(sword.angle) * projectileSpeed;
+    const dy = sin(sword.angle) * projectileSpeed;
+
+    // Create a new green projectile and add it to the array
+    greenProjectiles.push(
+      new Projectile(this.x, this.y, projectileSize, "green", dx, dy)
+    );
+  }
 
   moveWithJoystick() {
     if (data_x !== undefined && data_y !== undefined) {
@@ -290,11 +327,6 @@ class Circle {
   }
 }
 
-
-
-
-
-
 class Sword {
   constructor(x, y, length, angle) {
     this.x = x;
@@ -304,7 +336,7 @@ class Sword {
   }
 
   show() {
-    strokeWeight(2);
+    strokeWeight(5);
     stroke(0);
     push();
     translate(this.x, this.y);
@@ -322,8 +354,6 @@ class Sword {
     this.angle += angle;
   }
 }
-
-
 
 function swordIntersectsCircle(sword, circle) {
   const x2 = sword.x + sword.length * cos(sword.angle);
@@ -347,5 +377,9 @@ function keyPressed() {
     isGameWon = false;
     blueCircle.x = 20;
     blueCircle.y = 20;
+  }
+
+  if (key == 'c') {
+    blueCircle.shootProjectile();
   }
 }

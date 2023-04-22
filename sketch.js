@@ -8,16 +8,19 @@ let accumulatedData = "";
 let sword;
 let playerImage;
 let greenProjectiles = [];
+let greenCircleImg, blackCircleImg;
 
 function preload() {
   playerImage = loadImage("player.png");
+  greenCircleImg = loadImage("npc1.png");
+  //blackCircleImg = loadImage("path/to/black_circle_pixel_art.png");
 }
 
 function setup() {
   createCanvas(900, 500);
   blueCircle = new Circle(20, 20, 20, "blue");
-  greenCircle = new Circle(width - 20, height - 20, 20, "green");
-  sword = new Sword(blueCircle.x, blueCircle.y, 100, -1);
+  greenCircle = new CircleSprite(width - 20, height - 20, 20, "green", greenCircleImg);
+  sword = new Sword(blueCircle.x, blueCircle.y, 35, -1);
 
 
 
@@ -112,6 +115,8 @@ function draw() {
 
   sword.updatePosition(blueCircle.x+12, blueCircle.y+5);
   sword.show();
+ // blueCircle.updateSpritePosition();
+greenCircle.updateSpritePosition();
   blueCircle.show();
   greenCircle.show();
 
@@ -119,11 +124,11 @@ function draw() {
     greenProjectiles[i].show();
     greenProjectiles[i].move();
   }
-if (keyIsDown(88)) { 
-  sword.rotateAround(radians(20)); // 6 is an arbitrary value, adjust it to control the rotation speed
+if (kb.pressing('x')) { 
+  sword.rotateAround(radians(200)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
-if (keyIsDown(90)) { 
-  sword.rotateAround(radians(-20)); // 6 is an arbitrary value, adjust it to control the rotation speed
+if (kb.pressing('z')) { 
+  sword.rotateAround(radians(-200)); // 6 is an arbitrary value, adjust it to control the rotation speed
 }
   
   if (!isGameOver && !isGameWon) {
@@ -164,6 +169,19 @@ if (keyIsDown(90)) {
       blackCircles.splice(i, 1);
     }
   }
+
+  for (let i = greenProjectiles.length - 1; i >= 0; i--) {
+    const greenProjectile = greenProjectiles[i];
+    for (let j = blackCircles.length - 1; j >= 0; j--) {
+      const blackCircle = blackCircles[j];
+      if (greenProjectile.collidesWith(blackCircle)) {
+        greenProjectiles.splice(i, 1);
+        blackCircles.splice(j, 1);
+        break; // Break the inner lo
+      }}}
+
+
+
 }
 
 
@@ -191,23 +209,42 @@ class Projectile {
     this.x += this.dx;
     this.y += this.dy;
   }
+
+ 
+  collidesWith(otherCircle) {
+    let distanceBetween = dist(this.x, this.y, otherCircle.x, otherCircle.y);
+    return distanceBetween < (this.diameter + otherCircle.diameter) / 2;
+  }
 }
 
 
 
 
-
-
-class Circle {
-  constructor(x, y, diameter, color) {
+class CircleSprite {
+  constructor(x, y, diameter, color, img) {
     this.x = x;
     this.y = y;
-     this.vx = 0; 
-    this.vy = 0; 
+    this.vx = 0;
+    this.vy = 0;
     this.diameter = diameter;
     this.color = color;
+    this.sprite = createSprite(this.x, this.y);
+    this.sprite.addImage(img);
+    this.sprite.scale = diameter / img.width; // Adjust scale based on diameter
   }
 
+  show() {
+    drawSprites();
+  }
+
+  // Add this method to update the sprite position
+  updateSpritePosition() {
+    this.sprite.position.x = this.x;
+    this.sprite.position.y = this.y;
+  }
+
+  // Other methods remain the same
+  // ...
   show() {
     fill(this.color);
     noStroke();
@@ -218,15 +255,19 @@ class Circle {
     const projectileSize = 10;
     const projectileSpeed = 5;
 
+    // Calculate the position of the tip of the sword
+    const tipX = sword.x + sword.length * cos(sword.angle);
+    const tipY = sword.y + sword.length * sin(sword.angle);
+
     // Calculate the direction of the projectile based on the sword's angle
     const dx = cos(sword.angle) * projectileSpeed;
     const dy = sin(sword.angle) * projectileSpeed;
 
     // Create a new green projectile and add it to the array
     greenProjectiles.push(
-      new Projectile(this.x, this.y, projectileSize, "green", dx, dy)
+      new Projectile(tipX, tipY, projectileSize, "green", dx, dy)
     );
-  }
+}
 
   moveWithJoystick() {
     if (data_x !== undefined && data_y !== undefined) {
@@ -270,31 +311,152 @@ class Circle {
   
   
   
-  
-  
-  
-  
-  
-
 
  moveWithArrowKeys() {
   const acceleration = 0.3;
   const friction = 0.98;
   const gravity = 0;
 
-  if (keyIsDown(LEFT_ARROW)) {
+  if (kb.pressing(LEFT_ARROW)) {
     this.vx -= acceleration;
   }
-  if (keyIsDown(RIGHT_ARROW)) {
+  if (kb.pressing(RIGHT_ARROW)) {
     this.vx += acceleration;
   }
-  if (keyIsDown(UP_ARROW)) {
+  if (kb.pressing(UP_ARROW)) {
     this.vy -= acceleration;
   }
-  if (keyIsDown(DOWN_ARROW)) {
+  if (kb.pressing(DOWN_ARROW)) {
     this.vy += acceleration;
   }
 
+  this.vx *= friction;
+  this.vy *= friction;
+  this.vy += gravity;
+  this.x += this.vx;
+  this.y += this.vy;
+
+  // Boundaries
+  if (this.x - this.diameter / 2 < 0) {
+    this.x = this.diameter / 2;
+    this.vx = 0;
+  }
+  if (this.x + this.diameter / 2 > width) {
+    this.x = width - this.diameter / 2;
+    this.vx = 0;
+  }
+  if (this.y - this.diameter / 2 < 0) {
+    this.y = this.diameter / 2;
+    this.vy = 0;
+  }
+  if (this.y + this.diameter / 2 > height) {
+    this.y = height - this.diameter / 2;
+    this.vy = 0;
+  }
+}
+
+
+  collidesWith(otherCircle) {
+    let distanceBetween = dist(this.x, this.y, otherCircle.x, otherCircle.y);
+    return distanceBetween < (this.diameter + otherCircle.diameter) / 2;
+  }
+}
+
+
+class Circle {
+  constructor(x, y, diameter, color) {
+    this.x = x;
+    this.y = y;
+     this.vx = 0; 
+    this.vy = 0; 
+    this.diameter = diameter;
+    this.color = color;
+  }
+
+  show() {
+    fill(this.color);
+    noStroke();
+    ellipse(this.x, this.y, this.diameter);
+  }
+
+  shootProjectile() {
+    const projectileSize = 10;
+    const projectileSpeed = 5;
+
+    // Calculate the position of the tip of the sword
+    const tipX = sword.x + sword.length * cos(sword.angle);
+    const tipY = sword.y + sword.length * sin(sword.angle);
+
+    // Calculate the direction of the projectile based on the sword's angle
+    const dx = cos(sword.angle) * projectileSpeed;
+    const dy = sin(sword.angle) * projectileSpeed;
+
+    // Create a new green projectile and add it to the array
+    greenProjectiles.push(
+      new Projectile(tipX, tipY, projectileSize, "green", dx, dy)
+    );
+}
+
+  moveWithJoystick() {
+    if (data_x !== undefined && data_y !== undefined) {
+      const acceleration = 0.3;
+      const friction = 0.98;
+      const gravity = 0;
+  
+      const joystickScale = 2;
+  
+      let mappedX = map(data_x, 0, 1023, -joystickScale, joystickScale);
+      let mappedY = map(data_y, 0, 1023, -joystickScale, joystickScale);
+  
+      this.vx += mappedX * acceleration;
+      this.vy += mappedY * acceleration;
+  
+      this.vx *= friction;
+      this.vy *= friction;
+      this.vy += gravity;
+      this.x += this.vx;
+      this.y += this.vy;
+  
+      // Boundaries
+      if (this.x - this.diameter / 2 < 0) {
+        this.x = this.diameter / 2;
+        this.vx = 0;
+      }
+      if (this.x + this.diameter / 2 > width) {
+        this.x = width - this.diameter / 2;
+        this.vx = 0;
+      }
+      if (this.y - this.diameter / 2 < 0) {
+        this.y = this.diameter / 2;
+        this.vy = 0;
+      }
+      if (this.y + this.diameter / 2 > height) {
+        this.y = height - this.diameter / 2;
+        this.vy = 0;
+      }
+    }
+  }
+  
+  
+  
+
+ moveWithArrowKeys() {
+  const acceleration = 0.3;
+  const friction = 0.98;
+  const gravity = 0;
+
+  if (kb.pressing(LEFT_ARROW)) {
+    this.vx -= acceleration;
+  }
+  if (kb.pressing(RIGHT_ARROW)) {
+    this.vx += acceleration;
+  }
+  if (kb.pressing(UP_ARROW)) {
+    this.vy -= acceleration;
+  }
+  if (kb.pressing(DOWN_ARROW)) {
+    this.vy += acceleration;
+  }
   this.vx *= friction;
   this.vy *= friction;
   this.vy += gravity;
